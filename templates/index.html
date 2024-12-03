@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduling Service</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        h1,
+        h2 {
+            color: #343a40;
+        }
+
+        table {
+            margin-top: 20px;
+        }
+
+        .btn-custom {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-custom:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <!-- Naigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="btn btn-primary" href="http://127.0.0.1:5001/">Student</a>&nbsp;&nbsp;
+                </li>
+                <li class="nav-item active">
+                    <a class="btn btn-primary" href="http://127.0.0.1:5002/">Shedule</a>&nbsp;&nbsp;
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-primary" href="http://127.0.0.1:5003/">Message</a>&nbsp;&nbsp;
+                </li>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center my-4">Scheduling Service</h1>
+
+        <!-- Add Schedule Form -->
+        <div class="card mb-4">
+            <div class="card-header text-black h2">
+                Add Schedule
+            </div>
+            <div class="card-body">
+                <form id="addScheduleForm" class="row g-3">
+                    <div class="col-md-3">
+                        <input type="text" id="class_name" class="form-control" placeholder="Class Name" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" id="teacher" class="form-control" placeholder="Teacher" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="room" class="form-control" placeholder="Room" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="time" class="form-control" placeholder="Time" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-success w-100">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Update Schedule Form -->
+        <div class="card mb-4">
+            <div class="card-header text-black h2">
+                Update Schedule
+            </div>
+            <div class="card-body">
+                <form id="updateScheduleForm" class="row g-3">
+                    <div class="col-md-2">
+                        <input type="number" id="update_id" class="form-control" placeholder="Schedule ID" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="update_class_name" class="form-control" placeholder="Class Name"
+                            required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="update_teacher" class="form-control" placeholder="Teacher" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="update_room" class="form-control" placeholder="Room" required>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="text" id="update_time" class="form-control" placeholder="Time" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-warning w-100">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Delete Schedule Form -->
+        <div class="card mb-4">
+            <div class="card-header text-black h2">
+                Delete Schedule
+            </div>
+            <div class="card-body">
+                <form id="deleteScheduleForm" class="row g-3">
+                    <div class="col-md-10">
+                        <input type="number" id="delete_id" class="form-control" placeholder="Schedule ID" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-danger w-100">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Display Schedules -->
+        <h2 class="text-center h2">Class Schedule</h2>
+        <table class="table table-bordered table-striped mt-4">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Class Name</th>
+                    <th>Teacher</th>
+                    <th>Room</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="schedulesTable">
+                <!-- Schedule rows will go here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // JavaScript functionality remains the same
+        function loadSchedules() {
+            fetch('/schedules')
+                .then(response => response.json())
+                .then(schedules => {
+                    const tableBody = document.querySelector('#schedulesTable');
+                    tableBody.innerHTML = ''; // Clear existing rows
+                    schedules.forEach(schedule => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${schedule.id}</td>
+                            <td>${schedule.class_name}</td>
+                            <td>${schedule.teacher}</td>
+                            <td>${schedule.room}</td>
+                            <td>${schedule.time}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+        }
+
+        // Event listeners remain the same
+        document.querySelector('#addScheduleForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const data = {
+                class_name: document.querySelector('#class_name').value,
+                teacher: document.querySelector('#teacher').value,
+                room: document.querySelector('#room').value,
+                time: document.querySelector('#time').value,
+            };
+            fetch('/schedules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadSchedules();
+                });
+        });
+
+        document.querySelector('#updateScheduleForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const data = {
+                class_name: document.querySelector('#update_class_name').value,
+                teacher: document.querySelector('#update_teacher').value,
+                room: document.querySelector('#update_room').value,
+                time: document.querySelector('#update_time').value,
+            };
+            const scheduleId = document.querySelector('#update_id').value;
+            fetch(`/schedules/${scheduleId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadSchedules();
+                });
+        });
+
+        document.querySelector('#deleteScheduleForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const scheduleId = document.querySelector('#delete_id').value;
+            fetch(`/schedules/${scheduleId}`, {
+                method: 'DELETE'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    loadSchedules();
+                });
+        });
+
+        // Initial load of schedules
+        loadSchedules();
+    </script>
+</body>
+
+</html>
