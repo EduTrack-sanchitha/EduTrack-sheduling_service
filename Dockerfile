@@ -1,16 +1,29 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Stage 1: Build dependencies
+FROM python:3.9-alpine AS builder
 
-# Set the working directory in the container
+# Install build tools and dependencies
+RUN apk add --no-cache gcc musl-dev libffi-dev openssl-dev
+
+# Set the working directory
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
+# Copy requirements file and install dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# Stage 2: Create a lightweight runtime image
+FROM python:3.9-alpine
+
+# Set the working directory
+WORKDIR /app
+
+# Copy dependencies from the builder stage
+COPY --from=builder /install /usr/local
+
+# Copy only the application code
 COPY . /app
 
-# Install the dependencies from requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Expose port 5001 for the Flask app
+# Expose port 5001
 EXPOSE 5002
 
 # Set environment variables to prevent Python from buffering stdout and stderr
